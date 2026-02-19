@@ -156,7 +156,7 @@ export interface Page {
   id: number;
   title: string;
   hero?: HeroBlock[] | null;
-  contentLayout?: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[] | null;
+  contentLayout?: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | CalendarBlock)[] | null;
   sidebarLayout?: TeamStandingsBlock[] | null;
   meta?: {
     title?: string | null;
@@ -763,6 +763,16 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CalendarBlock".
+ */
+export interface CalendarBlock {
+  apiUrl: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'calendarBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TeamStandingsBlock".
  */
 export interface TeamStandingsBlock {
@@ -1063,6 +1073,7 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        calendarBlock?: T | CalendarBlockSelect<T>;
       };
   sidebarLayout?:
     | T
@@ -1174,6 +1185,15 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CalendarBlock_select".
+ */
+export interface CalendarBlockSelect<T extends boolean = true> {
+  apiUrl?: T;
   id?: T;
   blockName?: T;
 }

@@ -8,13 +8,15 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { TeamStandingsBlock } from '@/blocks/TeamStanding/Component'
+import { CalendarBlock } from './Calendar/Component'
 
 const contentBlockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
   formBlock: FormBlock,
-  mediaBlock: MediaBlock
+  mediaBlock: MediaBlock,
+  calendarBlock: CalendarBlock
 }
 
 const sidebarBlockComponents = {

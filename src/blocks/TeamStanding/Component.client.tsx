@@ -26,6 +26,10 @@ export const TeamStandings: React.FC<TeamStandingsProps> = ({ maleData, femaleDa
     return (
         <div className="flex flex-col items-center gap-6">
 
+            {/* Reusable title */}
+            <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">Rankings</h2>
+
+
             <div className="w-full max-w-sm shadow-md rounded-lg overflow-hidden border" style={{ borderColor: 'hsl(var(--border))' }}>
                 {/* Header */}
                 <div
@@ -56,7 +60,7 @@ export const TeamStandings: React.FC<TeamStandingsProps> = ({ maleData, femaleDa
                             </button>
                         </div>
                         <div className="whitespace-nowrap text-right">
-                            {tabs[currentTabIndex] === 'male' ? 'Male Team Rankings' : 'Female Team Rankings'}
+                            {tabs[currentTabIndex] === 'male' ? 'Male Team' : 'Female Team'}
                         </div>
 
                     </div>

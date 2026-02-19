@@ -21,6 +21,7 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 import { TeamStandingsBlock } from '@/blocks/TeamStanding/config'
+import { CalendarBlock } from '@/blocks/Calendar/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -84,7 +85,7 @@ export const Pages: CollectionConfig<'pages'> = {
               name: 'contentLayout',
               label: 'Main Content',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, CalendarBlock],
               required: false,
               admin: {
                 initCollapsed: true,
