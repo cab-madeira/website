@@ -5,6 +5,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import { Post } from '@/payload-types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,64 +27,50 @@ interface ImageIssue {
 }
 
 const imageIssues: ImageIssue[] = []
-let noticiasFolderId: number | null = null
+let postsFolderId: number | null = null
 
-// Get or create the "Noticias" folder
-async function getOrCreateNoticiasFolder(payload: any): Promise<number | null> {
-  if (noticiasFolderId) {
-    return noticiasFolderId
+// Get or create the "posts" folder
+async function getOrCreatePostsFolder(payload: any): Promise<number | null> {
+  if (postsFolderId) {
+    return postsFolderId
   }
 
-  // Check if "Noticias" folder already exists
+  // Check if "Posts" folder already exists
   const existingFolders = await payload.find({
     collection: 'payload-folders',
     where: {
       name: {
-        equals: 'Noticias',
+        equals: 'Posts',
       },
     },
     limit: 1,
   })
 
   if (existingFolders.docs.length > 0) {
-    noticiasFolderId = existingFolders.docs[0].id
-    console.log('📁 Using existing "Noticias" folder')
-    return noticiasFolderId
+    postsFolderId = existingFolders.docs[0].id
+    console.log('Using existing "Posts" folder')
+    return postsFolderId
   }
 
-  // Create the "Noticias" folder
+  // Create the "Posts" folder
   const newFolder = await payload.create({
     collection: 'payload-folders',
     data: {
-      name: 'Noticias',
+      name: 'Posts',
       folderType: ['media'],
     },
   })
 
-  noticiasFolderId = newFolder.id
-  console.log('📁 Created new "Noticias" folder')
-  return noticiasFolderId
+  postsFolderId = newFolder.id
+  console.log('Created new "Posts" folder')
+  return postsFolderId
 }
 
 // Convert plain text to Lexical editor format
-function textToLexical(text: string, heroImageId?: string | null) {
+function textToLexical(text: string) {
   const paragraphs = text.split('\n\n').filter((line) => line.trim() !== '')
 
   const children: any[] = []
-
-  // Add hero image at the beginning if provided
-  if (heroImageId) {
-    children.push({
-      type: 'block',
-      fields: {
-        blockName: 'Hero Image',
-        blockType: 'mediaBlock',
-        media: heroImageId,
-      },
-      format: '',
-      version: 2,
-    })
-  }
 
   // Add text paragraphs
   paragraphs.forEach((paragraph) => {
@@ -119,7 +106,8 @@ function textToLexical(text: string, heroImageId?: string | null) {
 // Parse date from DD/MM/YYYY format
 function parseDate(dateStr: string): Date {
   const [day, month, year] = dateStr.split('/').map(Number)
-  return new Date(year, month - 1, day)
+  // Create date at noon UTC to avoid timezone issues
+  return new Date(Date.UTC(year, month - 1, day, 12, 0, 0))
 }
 
 // Generate slug from title and date to ensure uniqueness
@@ -143,7 +131,11 @@ async function findOrCreateMedia(
   imagePath: string,
   postTitle: string,
   postSlug: string,
+  postFolder: string,
 ) {
+  // If imagePath is just a filename, look for it in the post folder
+  const isRelativePath = !imagePath.includes('/')
+
   // Extract filename from path
   const filename = path.basename(imagePath)
 
@@ -183,19 +175,26 @@ async function findOrCreateMedia(
   })
 
   if (existingMedia.docs.length > 0) {
-    console.log(`  ℹ Media already exists: ${filename}`)
+    console.log(`Media already exists: ${filename}`)
     return existingMedia.docs[0].id
   }
 
-  // Get the "Noticias" folder
-  const noticiasFolder = await getOrCreateNoticiasFolder(payload)
-  if (!noticiasFolder) {
-    console.log(`  ⚠ Could not create or find "Noticias" folder`)
+  // Get the "Posts" folder
+  const postsFolder = await getOrCreatePostsFolder(payload)
+  if (!postsFolder) {
+    console.log(`  ⚠ Could not create or find "Posts" folder`)
     return null
   }
 
-  // Try to find the image in data/images folder
-  const dataImagePath = path.resolve(__dirname, '../data', imagePath)
+  // Try to find the image - first in post folder, then in data/images folder
+  let dataImagePath: string
+  if (isRelativePath) {
+    // Image is in the same folder as data.json
+    dataImagePath = path.resolve(__dirname, '../data/posts', postFolder, imagePath)
+  } else {
+    // Image has a path (legacy format)
+    dataImagePath = path.resolve(__dirname, '../data', imagePath)
+  }
 
   try {
     // Check if image exists in data/images
@@ -208,7 +207,7 @@ async function findOrCreateMedia(
     const processedBuffer = await sharp(fileBuffer, { failOnError: false }).toBuffer()
 
     console.log(
-      `  📤 Uploading image: ${filename} (${mimetype}, ${(processedBuffer.length / 1024).toFixed(1)} KB)`,
+      `Uploading image: ${filename} (${mimetype}, ${(processedBuffer.length / 1024).toFixed(1)} KB)`,
     )
 
     // Create media entry using Payload's upload API
@@ -217,7 +216,7 @@ async function findOrCreateMedia(
         collection: 'media',
         data: {
           alt: filename.replace(/\.[^/.]+$/, ''), // Remove extension for alt text
-          folder: noticiasFolder, // Assign to "Noticias" folder
+          folder: postsFolder, // Assign to "Posts" folder
         },
         file: {
           data: processedBuffer,
@@ -228,7 +227,7 @@ async function findOrCreateMedia(
       })
 
       console.log(
-        `  ✅ Uploaded and created media entry: ${filename} (${(processedBuffer.length / 1024).toFixed(1)} KB, in "Noticias" folder)`,
+        `Uploaded and created media entry: ${filename} (${(processedBuffer.length / 1024).toFixed(1)} KB, in "Posts" folder)`,
       )
       return media.id
     } catch (uploadError: any) {
@@ -238,8 +237,8 @@ async function findOrCreateMedia(
         uploadError.message?.includes('JPEG') ||
         uploadError.message?.includes('image')
       ) {
-        console.log(`  ⚠ Image is corrupted or invalid: ${filename}`)
-        console.log(`  📝 Skipping image upload, post will be created without hero image`)
+        console.log(`Image is corrupted or invalid: ${filename}`)
+        console.log(`Skipping image upload, post will be created without hero image`)
         imageIssues.push({
           postTitle,
           postSlug,
@@ -253,8 +252,8 @@ async function findOrCreateMedia(
     }
   } catch (error: any) {
     if (error.code === 'ENOENT') {
-      console.log(`  ⚠ Image file not found: ${imagePath}`)
-      console.log(`  📝 Searched at: ${dataImagePath}`)
+      console.log(`Image file not found: ${imagePath}`)
+      console.log(`Searched at: ${dataImagePath}`)
       imageIssues.push({
         postTitle,
         postSlug,
@@ -262,7 +261,7 @@ async function findOrCreateMedia(
         reason: 'not_found',
       })
     } else if (!error.message?.includes('Vips') && !error.message?.includes('JPEG')) {
-      console.log(`  ⚠ Error processing image: ${error.message}`)
+      console.log(`Error processing image: ${error.message}`)
       imageIssues.push({
         postTitle,
         postSlug,
@@ -281,32 +280,74 @@ async function importPosts() {
   const args = process.argv.slice(2)
   const shouldDelete = args.includes('--delete') || args.includes('--clean')
 
-  console.log('🚀 Starting post import...\n')
+  // Parse range arguments
+  let startIndex = 0
+  let limitCount: number | null = null
+
+  // Check for --start argument
+  const startArgIndex = args.findIndex((arg) => arg === '--start')
+  if (startArgIndex !== -1 && args[startArgIndex + 1]) {
+    startIndex = parseInt(args[startArgIndex + 1], 10)
+    if (isNaN(startIndex) || startIndex < 0) {
+      console.error('❌ Invalid --start value. Must be a positive integer.')
+      process.exit(1)
+    }
+  }
+
+  // Check for --limit argument
+  const limitArgIndex = args.findIndex((arg) => arg === '--limit')
+  if (limitArgIndex !== -1 && args[limitArgIndex + 1]) {
+    limitCount = parseInt(args[limitArgIndex + 1], 10)
+    if (isNaN(limitCount) || limitCount < 1) {
+      console.error('❌ Invalid --limit value. Must be a positive integer.')
+      process.exit(1)
+    }
+  }
+
+  // Check for --range argument (format: --range 10-20)
+  const rangeArgIndex = args.findIndex((arg) => arg === '--range')
+  if (rangeArgIndex !== -1 && args[rangeArgIndex + 1]) {
+    const rangeMatch = args[rangeArgIndex + 1].match(/^(\d+)-(\d+)$/)
+    if (rangeMatch) {
+      startIndex = parseInt(rangeMatch[1], 10)
+      const endIndex = parseInt(rangeMatch[2], 10)
+      if (endIndex < startIndex) {
+        console.error('❌ Invalid --range value. End must be greater than or equal to start.')
+        process.exit(1)
+      }
+      limitCount = endIndex - startIndex + 1
+    } else {
+      console.error('❌ Invalid --range format. Use: --range START-END (e.g., --range 0-50)')
+      process.exit(1)
+    }
+  }
+
+  console.log('Starting post import...\n')
 
   // Initialize Payload
   const payload = await getPayload({ config })
-  console.log('✅ Payload initialized\n')
+  console.log('Payload initialized\n')
 
   if (shouldDelete) {
-    console.log('🗑️  DELETE MODE: Deleting all posts and media in "Noticias" folder...\n')
+    console.log('DELETE MODE: Deleting all posts and media in "Posts" folder...\n')
 
-    // Initialize the "Noticias" folder to get its ID
-    const noticiasFolderId = await getOrCreateNoticiasFolder(payload)
+    // Initialize the "Posts" folder to get its ID
+    const postsFolderId = await getOrCreatePostsFolder(payload)
 
     // Get all posts
     const allPosts = await payload.find({
       collection: 'posts',
-      limit: 1000, // Adjust if you have more than 1000 posts
+      limit: 1500, // Adjust if you have more than 1500 posts
     })
 
-    console.log(`📂 Found ${allPosts.docs.length} posts to delete\n`)
+    console.log(`Found ${allPosts.docs.length} posts to delete\n`)
 
     let deletedPosts = 0
     let postErrors = 0
 
     for (const post of allPosts.docs) {
       try {
-        console.log(`🗑️  Deleting post: "${post.title}" (${post.slug})`)
+        console.log(`Deleting post: "${post.title}" (${post.slug})`)
         await payload.delete({
           collection: 'posts',
           id: post.id,
@@ -321,25 +362,25 @@ async function importPosts() {
       }
     }
 
-    // Get all media in "Noticias" folder only
+    // Get all media in "Posts" folder only
     const allMedia = await payload.find({
       collection: 'media',
       where: {
         folder: {
-          equals: noticiasFolderId,
+          equals: postsFolderId,
         },
       },
-      limit: 1000, // Adjust if you have more than 1000 media files
+      limit: 1500, // Adjust if you have more than 1500 media files
     })
 
-    console.log(`\n🖼️  Found ${allMedia.docs.length} media files in "Noticias" folder to delete\n`)
+    console.log(`\nFound ${allMedia.docs.length} media files in "Posts" folder to delete\n`)
 
     let deletedMedia = 0
     let mediaErrors = 0
 
     for (const media of allMedia.docs) {
       try {
-        console.log(`🗑️  Deleting media: "${media.filename}" (${media.id})`)
+        console.log(`Deleting media: "${media.filename}" (${media.id})`)
         await payload.delete({
           collection: 'media',
           id: media.id,
@@ -351,41 +392,69 @@ async function importPosts() {
       }
     }
 
-    console.log('\n═══════════════════════════════════════')
-    console.log('📊 Delete Summary:')
-    console.log(`   🗑️  Posts Deleted: ${deletedPosts}`)
-    console.log(`   ❌ Post Errors: ${postErrors}`)
-    console.log(`   🖼️  Media Deleted (Noticias folder): ${deletedMedia}`)
-    console.log(`   ❌ Media Errors: ${mediaErrors}`)
-    console.log(`   📝 Total Posts: ${allPosts.docs.length}`)
-    console.log(`   📝 Total Media (Noticias): ${allMedia.docs.length}`)
-    console.log('═══════════════════════════════════════\n')
+    console.log('\n=======================================')
+    console.log('Delete Summary:')
+    console.log(`   Posts Deleted: ${deletedPosts}`)
+    console.log(`   Post Errors: ${postErrors}`)
+    console.log(`   Media Deleted (Posts folder): ${deletedMedia}`)
+    console.log(`   Media Errors: ${mediaErrors}`)
+    console.log(`   Total Posts: ${allPosts.docs.length}`)
+    console.log(`   Total Media (Posts): ${allMedia.docs.length}`)
+    console.log('=======================================\n')
 
     process.exit(0)
   }
 
-  // Initialize the "Noticias" folder for media uploads
-  await getOrCreateNoticiasFolder(payload)
+  // Initialize the "Posts" folder for media uploads
+  await getOrCreatePostsFolder(payload)
 
   // Continue with normal import logic...
 
-  // Read all JSON files from data/posts directory
+  // Read all JSON files from data/posts directory (now organized in ID folders)
   const dataDir = path.resolve(__dirname, '../data/posts')
-  const files = await fs.readdir(dataDir)
-  const jsonFiles = files.filter((file) => file.endsWith('.json'))
+  const idFolders = await fs.readdir(dataDir)
 
-  console.log(`📂 Found ${jsonFiles.length} JSON files to import\n`)
+  // Collect all data.json files from ID folders
+  const jsonFiles: Array<{ folder: string; file: string }> = []
+  for (const folder of idFolders) {
+    const folderPath = path.join(dataDir, folder)
+    const stat = await fs.stat(folderPath)
+
+    if (stat.isDirectory()) {
+      const dataJsonPath = path.join(folderPath, 'data.json')
+      try {
+        await fs.access(dataJsonPath)
+        jsonFiles.push({ folder, file: 'data.json' })
+      } catch {
+        // data.json doesn't exist in this folder, skip it
+      }
+    }
+  }
+
+  console.log(`Found ${jsonFiles.length} JSON files to import`)
+
+  // Apply range filtering
+  let filesToImport = jsonFiles
+  if (startIndex > 0 || limitCount !== null) {
+    const endIndex = limitCount !== null ? startIndex + limitCount : jsonFiles.length
+    filesToImport = jsonFiles.slice(startIndex, endIndex)
+    console.log(
+      `Importing range: ${startIndex} to ${Math.min(endIndex - 1, jsonFiles.length - 1)} (${filesToImport.length} files)\n`,
+    )
+  } else {
+    console.log()
+  }
 
   let imported = 0
   let skipped = 0
   let errors = 0
 
-  for (const file of jsonFiles) {
+  for (const { folder, file } of filesToImport) {
     try {
-      console.log(`📄 Processing: ${file}`)
+      console.log(`Processing: ${folder}/${file}`)
 
       // Read and parse JSON file
-      const filePath = path.join(dataDir, file)
+      const filePath = path.join(dataDir, folder, file)
       const fileContent = await fs.readFile(filePath, 'utf-8')
       const jsonData: JsonPost = JSON.parse(fileContent)
 
@@ -407,7 +476,7 @@ async function importPosts() {
       })
 
       if (existingPost.docs.length > 0) {
-        console.log(`  ⏭️  Post already exists: "${jsonData.title}" (${slug})\n`)
+        console.log(`Post already exists: "${jsonData.title}" (${slug})\n`)
         skipped++
         continue
       }
@@ -415,11 +484,11 @@ async function importPosts() {
       // Try to find or create media
       let heroImageId = null
       if (jsonData.image) {
-        heroImageId = await findOrCreateMedia(payload, jsonData.image, jsonData.title, slug)
+        heroImageId = await findOrCreateMedia(payload, jsonData.image, jsonData.title, slug, folder)
       }
 
       // Convert body text to Lexical format with image at the beginning
-      const content = textToLexical(jsonData.body, heroImageId)
+      const content = textToLexical(jsonData.body)
 
       // Extract first 100 characters for meta description
       const plainText = jsonData.body.replace(/\n\n/g, ' ').replace(/\n/g, ' ')
@@ -429,15 +498,17 @@ async function importPosts() {
       const postData: any = {
         title: jsonData.title,
         slug,
+        heroImage: heroImageId,
         content,
         publishedAt,
+        updateDate: publishedAt, // Set updateDate same as creation
         _status: 'published',
-        authors: [], // Empty array since we don't have author data in JSON
-        categories: [], // Empty array for categories
+        authors: [1],
+        categories: [],
         meta: {
           title: jsonData.title,
           description: metaDescription,
-          image: heroImageId, // Keep image for SEO metadata
+          image: heroImageId,
         },
       }
 
@@ -456,26 +527,32 @@ async function importPosts() {
         data: postData,
       })
 
-      console.log(`  ✅ Created post: "${jsonData.title}"`)
-      console.log(`     Slug: ${result.slug}`)
-      console.log(`     Published: ${publishedAt.toISOString()}`)
-      console.log(`     Content Image: ${heroImageId ? 'Yes (at top)' : 'No'}\n`)
+      console.log(`Created post: "${jsonData.title}"`)
+      console.log(`   Slug: ${result.slug}`)
+      console.log(`   Published: ${publishedAt.toISOString()}`)
+      console.log(`   Content Image: ${heroImageId ? 'Yes (at top)' : 'No'}\n`)
 
       imported++
     } catch (error) {
-      console.error(`  ❌ Error processing ${file}:`, error)
+      console.error(`Error processing ${folder}/${file}:`, error)
       console.error('')
       errors++
     }
   }
 
-  console.log('═══════════════════════════════════════')
-  console.log('📊 Import Summary:')
-  console.log(`   ✅ Imported: ${imported}`)
-  console.log(`   ⏭️  Skipped: ${skipped}`)
-  console.log(`   ❌ Errors: ${errors}`)
-  console.log(`   📝 Total: ${jsonFiles.length}`)
-  console.log('═══════════════════════════════════════\n')
+  console.log('=======================================')
+  console.log('Import Summary:')
+  console.log(`   Imported: ${imported}`)
+  console.log(`   Skipped: ${skipped}`)
+  console.log(`   Errors: ${errors}`)
+  console.log(`   Processed: ${filesToImport.length}`)
+  if (startIndex > 0 || limitCount !== null) {
+    console.log(`   Total Available: ${jsonFiles.length}`)
+    console.log(
+      `   Range: ${startIndex}-${Math.min(startIndex + filesToImport.length - 1, jsonFiles.length - 1)}`,
+    )
+  }
+  console.log('=======================================\n')
 
   // Write image issues log if any
   if (imageIssues.length > 0) {
@@ -544,11 +621,11 @@ async function importPosts() {
     // Write to file
     await fs.writeFile(logFilePath, logContent.join('\n'), 'utf-8')
 
-    console.log('⚠️  Image Issues Detected:')
-    console.log(`   📄 Not Found: ${notFound.length}`)
-    console.log(`   🔴 Corrupted: ${corrupted.length}`)
-    console.log(`   ❌ Other Errors: ${other.length}`)
-    console.log(`   📝 Log file: ${logFilePath}\n`)
+    console.log('Image Issues Detected:')
+    console.log(`   Not Found: ${notFound.length}`)
+    console.log(`   Corrupted: ${corrupted.length}`)
+    console.log(`   Other Errors: ${other.length}`)
+    console.log(`   Log file: ${logFilePath}\n`)
   }
 
   process.exit(0)
@@ -556,6 +633,6 @@ async function importPosts() {
 
 // Run the import
 importPosts().catch((error) => {
-  console.error('❌ Fatal error:', error)
+  console.error('Fatal error:', error)
   process.exit(1)
 })

@@ -24,12 +24,11 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   if (!Number.isInteger(sanitizedPageNumber)) notFound()
 
-  const posts = await payload.find({
-    collection: 'posts',
+  const galleries = await payload.find({
+    collection: 'gallery',
     depth: 1,
     limit: 12,
     page: sanitizedPageNumber,
-    overrideAccess: false,
   })
 
   return (
@@ -37,24 +36,24 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>Galleries</h1>
         </div>
       </div>
 
       <div className="container mb-8">
         <PageRange
-          collection="posts"
-          currentPage={posts.page}
+          collection="gallery"
+          currentPage={galleries.page}
           limit={12}
-          totalDocs={posts.totalDocs}
+          totalDocs={galleries.totalDocs}
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive posts={galleries.docs} relationTo="gallery" />
 
       <div className="container">
-        {posts?.page && posts?.totalPages > 1 && (
-          <Pagination page={posts.page} totalPages={posts.totalPages} basePath="/posts" />
+        {galleries?.page && galleries?.totalPages > 1 && (
+          <Pagination page={galleries.page} totalPages={galleries.totalPages} basePath="/gallery" />
         )}
       </div>
     </div>
@@ -71,8 +70,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const { totalDocs } = await payload.count({
-    collection: 'posts',
-    overrideAccess: false,
+    collection: 'gallery',
   })
 
   const totalPages = Math.ceil(totalDocs / 10)

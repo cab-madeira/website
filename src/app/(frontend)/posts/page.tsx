@@ -9,7 +9,7 @@ import React from 'react'
 import PageClient from './page.client'
 
 export const dynamic = 'force-static'
-// export const revalidate = 600
+export const revalidate = 600
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
@@ -49,7 +49,7 @@ export default async function Page() {
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (
-          <Pagination page={posts.page} totalPages={posts.totalPages} />
+          <Pagination page={posts.page} totalPages={posts.totalPages} basePath="/posts" />
         )}
       </div>
     </div>

@@ -22,7 +22,7 @@ export const ArchiveBlock: React.FC<
     collection: 'posts',
     depth: 1,
     limit: 3,
-    sort: '-createdAt',
+    sort: '-publishedAt',
   })
 
   const posts = fetchedPosts.docs
@@ -58,7 +58,7 @@ export const ArchiveBlock: React.FC<
             <div className="p-6">
               {/* Date: same on small and medium, bigger on large */}
               <p className="text-sm lg:text-md mb-2">
-                {new Date(firstPost.createdAt).toLocaleDateString()}
+                {firstPost.publishedAt && new Date(firstPost.publishedAt).toLocaleDateString()}
               </p>
 
               {/* Title: same on small/medium, larger on large screens */}
@@ -89,7 +89,7 @@ export const ArchiveBlock: React.FC<
 
               <div className="p-5">
                 <p className="text-xs mb-2">
-                  {new Date(post.createdAt).toLocaleDateString()}
+                  {post.publishedAt && new Date(post.publishedAt).toLocaleDateString()}
                 </p>
                 <h3 className="text-lg font-semibold text-[hsl(var(--primary))] group-hover:underline">
                   {post.title}
