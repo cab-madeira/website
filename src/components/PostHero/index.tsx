@@ -57,7 +57,7 @@ export const PostHero: React.FC<{
 
       {/* Image below text, full container width */}
       {heroImage && typeof heroImage !== 'string' && (
-        <div className='container mt-3' >
+        <div className='mx-auto mt-3 w-[720px] max-w-full px-4 md:px-8' >
           <Media priority imgClassName="w-full h-full border border-border rounded-[0.8rem] m-0" resource={heroImage} />
         </div>
       )}

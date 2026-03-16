@@ -12,6 +12,7 @@ import { CalendarBlock } from './Calendar/Component'
 import { NextMatchBlock } from './NextMatchBlock/Component'
 import { DiviserBlock } from './Diviser/Component'
 import { ShopFeaturedBlock } from './ShopFeaturedBlock/Component'
+import { GalleryBlock } from './GalleryBlock/Component'
 
 const contentBlockComponents = {
   archive: ArchiveBlock,
@@ -20,13 +21,15 @@ const contentBlockComponents = {
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
   diviserBlock: DiviserBlock,
-  shopFeaturedBlock: ShopFeaturedBlock
+  shopFeaturedBlock: ShopFeaturedBlock,
+  galleryBlock: GalleryBlock
 }
 
 const sidebarBlockComponents = {
   teamStandingsBlock: TeamStandingsBlock,
   nextMatchBlock: NextMatchBlock,
   calendarBlock: CalendarBlock,
+  formBlock: FormBlock,
 }
 
 export const RenderBlocks: React.FC<{

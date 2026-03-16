@@ -8,6 +8,9 @@ import {
 
 export const Banner: Block = {
   slug: 'banner',
+  admin: {
+    disableBlockName: true,
+  },
   fields: [
     {
       name: 'style',

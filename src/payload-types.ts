@@ -114,12 +114,17 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    globalAPI: GlobalAPI;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    globalAPI: GlobalAPISelect<false> | GlobalAPISelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: {
@@ -159,9 +164,28 @@ export interface Page {
   title: string;
   hero?: HeroBlock[] | null;
   contentLayout?:
-    | (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | DiviserBlock | ShopFeaturedBlock)[]
+    | (
+        | CallToActionBlock
+        | ContentBlock
+        | {
+            media: number | Media;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaBlock';
+          }
+        | ArchiveBlock
+        | {
+            form: number | Form;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'formBlock';
+          }
+        | DiviserBlock
+        | ShopFeaturedBlock
+        | GalleryBlock
+      )[]
     | null;
-  sidebarLayout?: (TeamStandingsBlock | NextMatchBlock | CalendarBlock)[] | null;
+  sidebarLayout?: (TeamStandingsBlock | NextMatchBlock | CalendarBlock | FormBlock)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -508,16 +532,6 @@ export interface ContentBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
- */
-export interface MediaBlock {
-  media: number | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
@@ -525,32 +539,6 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: number | Form;
-  enableIntro?: boolean | null;
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -740,14 +728,19 @@ export interface DiviserBlock {
  * via the `definition` "ShopFeaturedBlock".
  */
 export interface ShopFeaturedBlock {
-  /**
-   * Show only 3 products with a link to the full shop
-   */
-  isCompactView?: boolean | null;
-  shopApiUrl: string;
+  apiField: 'shopAPI';
   id?: string | null;
   blockName?: string | null;
   blockType: 'shopFeaturedBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock".
+ */
+export interface GalleryBlock {
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'galleryBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -780,6 +773,16 @@ export interface CalendarBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'calendarBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock".
+ */
+export interface FormBlock {
+  form: number | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'formBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1103,6 +1106,7 @@ export interface PagesSelect<T extends boolean = true> {
         formBlock?: T | FormBlockSelect<T>;
         diviserBlock?: T | DiviserBlockSelect<T>;
         shopFeaturedBlock?: T | ShopFeaturedBlockSelect<T>;
+        galleryBlock?: T | GalleryBlockSelect<T>;
       };
   sidebarLayout?:
     | T
@@ -1110,6 +1114,7 @@ export interface PagesSelect<T extends boolean = true> {
         teamStandingsBlock?: T | TeamStandingsBlockSelect<T>;
         nextMatchBlock?: T | NextMatchBlockSelect<T>;
         calendarBlock?: T | CalendarBlockSelect<T>;
+        formBlock?: T | FormBlockSelect<T>;
       };
   meta?:
     | T
@@ -1208,8 +1213,6 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
  */
 export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
-  enableIntro?: T;
-  introContent?: T;
   id?: T;
   blockName?: T;
 }
@@ -1226,8 +1229,15 @@ export interface DiviserBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopFeaturedBlock_select".
  */
 export interface ShopFeaturedBlockSelect<T extends boolean = true> {
-  isCompactView?: T;
-  shopApiUrl?: T;
+  apiField?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock_select".
+ */
+export interface GalleryBlockSelect<T extends boolean = true> {
   id?: T;
   blockName?: T;
 }
@@ -1782,6 +1792,16 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "globalAPI".
+ */
+export interface GlobalAPI {
+  id: number;
+  shopAPI: string;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1828,6 +1848,26 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "globalAPI_select".
+ */
+export interface GlobalAPISelect<T extends boolean = true> {
+  shopAPI?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -1847,6 +1887,16 @@ export interface TaskSchedulePublish {
     user?: (number | null) | User;
   };
   output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock".
+ */
+export interface MediaBlock {
+  media: number | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

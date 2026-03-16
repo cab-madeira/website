@@ -66,6 +66,9 @@ const columnFields: Field[] = [
 export const Content: Block = {
   slug: 'content',
   interfaceName: 'ContentBlock',
+  admin: {
+    disableBlockName: true,
+  },
   fields: [
     {
       name: 'columns',

@@ -31,6 +31,34 @@ export default async function Page({ params: paramsPromise }: Args) {
     page: sanitizedPageNumber,
   })
 
+  const galleriesWithFirstImage = await Promise.all(
+    galleries.docs.map(async (gallery) => {
+      const folderId = typeof gallery.images === 'number' ? gallery.images : gallery.images?.id
+
+      if (!folderId) return gallery
+
+      const folderMedia = await payload.find({
+        collection: 'media',
+        depth: 0,
+        limit: 1,
+        sort: 'createdAt',
+        where: {
+          folder: {
+            equals: folderId,
+          },
+        },
+      })
+
+      return {
+        ...gallery,
+        meta: {
+          ...gallery.meta,
+          image: folderMedia.docs?.[0] || gallery.meta?.image,
+        },
+      }
+    }),
+  )
+
   return (
     <div className="pt-24 pb-24">
       <PageClient />
@@ -49,7 +77,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionArchive posts={galleries.docs} relationTo="gallery" />
+      <CollectionArchive posts={galleriesWithFirstImage} relationTo="gallery" />
 
       <div className="container">
         {galleries?.page && galleries?.totalPages > 1 && (

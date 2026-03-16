@@ -7,6 +7,9 @@ export const Archive: Block = {
     plural: 'Archives',
     singular: 'Archive',
   },
+  admin: {
+    disableBlockName: true,
+  },
   fields: [
     {
       name: 'Description',

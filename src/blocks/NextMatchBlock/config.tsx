@@ -7,6 +7,9 @@ export const NextMatchBlock: Block = {
         singular: 'Next Match',
         plural: 'Next Matches',
     },
+    admin: {
+        disableBlockName: true,
+    },
     fields: [
         {
             name: 'maleApiUrl',

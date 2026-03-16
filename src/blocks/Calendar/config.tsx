@@ -7,6 +7,9 @@ export const CalendarBlock: Block = {
         singular: 'Calendar',
         plural: 'Calendars',
     },
+    admin: {
+        disableBlockName: true,
+    },
     fields: [
         {
             name: 'apiUrl',

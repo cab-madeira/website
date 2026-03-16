@@ -10,6 +10,9 @@ import {
 export const Hero: Block = {
   slug: 'heroBlock',
   interfaceName: 'HeroBlock',
+  admin: {
+    disableBlockName: true,
+  },
   fields: [
     {
       name: 'media',

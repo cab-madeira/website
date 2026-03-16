@@ -7,5 +7,8 @@ export const DiviserBlock: Block = {
     singular: 'Diviser',
     plural: 'Divisers',
   },
+  admin: {
+    disableBlockName: true,
+  },
   fields: [],
 }

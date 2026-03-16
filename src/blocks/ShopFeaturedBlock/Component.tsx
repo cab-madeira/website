@@ -1,5 +1,9 @@
 import { fetchUtil } from '@/utilities/fetchUtil'
-import type { ShopFeaturedBlock as ShopFeaturedProps } from '@/payload-types'
+import type {
+    GlobalAPI,
+    ShopFeaturedBlock as ShopFeaturedProps,
+} from '@/payload-types'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 import { ShopFeatured } from './Component.client'
 import React from 'react'
 import { load } from 'cheerio'
@@ -12,10 +16,14 @@ type Product = {
 }
 
 export const ShopFeaturedBlock: React.FC<ShopFeaturedProps> = async ({
-    shopApiUrl,
-    isCompactView,
+    apiField,
 }) => {
-    const normalizedCompactView = !!isCompactView
+    const globalAPI = (await getCachedGlobal('globalAPI', 1)()) as GlobalAPI
+    const shopApiUrl = globalAPI[apiField]
+
+    if (!shopApiUrl) {
+        return <ShopFeatured products={[]} />
+    }
 
     const res = await fetchUtil(shopApiUrl, {
         next: { revalidate: 3600 },
@@ -56,14 +64,11 @@ export const ShopFeaturedBlock: React.FC<ShopFeaturedProps> = async ({
         })
     })
 
-    const displayProducts = normalizedCompactView
-        ? products.slice(0, 6)
-        : products
+    const displayProducts = products.slice(0, 6)
 
     return (
         <ShopFeatured
             products={displayProducts}
-            isCompactView={normalizedCompactView}
         />
     )
 }

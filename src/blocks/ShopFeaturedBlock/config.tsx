@@ -7,24 +7,21 @@ export const ShopFeaturedBlock: Block = {
         singular: 'Shop Featured',
         plural: 'Shop Featured',
     },
+    admin: {
+        disableBlockName: true,
+    },
     fields: [
         {
-            name: 'isCompactView',
-            label: 'Compact View',
-            type: 'checkbox',
-            defaultValue: false,
-            admin: {
-                description: 'Show only 3 products with a link to the full shop',
-            },
-        },
-        {
-            name: 'shopApiUrl',
-            label: 'Shop API URL',
-            type: 'text',
+            name: 'apiField',
+            label: 'API Variable',
+            type: 'select',
             required: true,
-            admin: {
-                placeholder: 'https://example.com/api/shop',
-            },
+            options: [
+                {
+                    label: 'Shop API URL',
+                    value: 'shopAPI',
+                },
+            ],
         },
     ],
 }

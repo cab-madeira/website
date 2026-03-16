@@ -109,7 +109,7 @@ const CustomDayButton = React.forwardRef<
             <button
                 ref={ref}
                 className={cn(
-                    "flex aspect-square h-12 w-full min-w-[48px] items-center justify-center rounded-md text-sm hover:bg-accent",
+                    "flex aspect-square h-12 w-full min-w-[48px] items-center justify-center rounded-md bg-secondary text-secondary-foreground text-sm hover:bg-primary hover:text-primary-foreground ]",
                     defaultClassNames.day,
                     className
                 )}
@@ -195,7 +195,7 @@ export function CalendarWithEvents({
                     month={currentMonth}
                     onMonthChange={setCurrentMonth}
                     onSelect={handleDateSelect}
-                    className="w-full p-0 m-0 [--cell-size:48px]"
+                    className="w-full p-0 m-0 bg-secondary [--cell-size:48px]"
                     components={{
                         MonthCaption: CustomMonthCaption,
                         DayButton: (props) => (

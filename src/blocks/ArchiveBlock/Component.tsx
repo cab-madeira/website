@@ -33,20 +33,20 @@ export const ArchiveBlock: React.FC<
 
   return (
     <section id={`block-${id}`}>
-      <div className="flex flex-col items-center gap-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4">
         {/* Reusable title */}
         <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">Latest News</h2>
 
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
           {/* First Post - Full Width */}
           <a
             href={`/posts/${firstPost.slug}`}
-            className="group border md:col-span-2 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300"
+            className="group border md:col-span-2 w-full max-w-[760px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300"
             style={{ backgroundColor: 'hsl(var(--secondary))' }}
           >
             {firstPost?.meta?.image && typeof firstPost.meta.image === 'object' && (
-              <div className="relative h-64 md:h-96 w-full overflow-hidden">
+              <div className="relative h-[280px] w-full overflow-hidden">
                 <Media
                   fill
                   imgClassName="w-full h-full object-cover group-hover:scale-105 transition duration-500"
@@ -73,12 +73,12 @@ export const ArchiveBlock: React.FC<
             <a
               key={post.id}
               href={`/posts/${post.slug}`}
-              className="group border rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 "
+              className="group border w-full max-w-[360px] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition duration-300"
               style={{ backgroundColor: 'hsl(var(--secondary))' }}
 
             >
               {post?.meta?.image && typeof post.meta.image === 'object' && (
-                <div className="relative h-48 w-full overflow-hidden">
+                <div className="relative h-[180px] w-full overflow-hidden">
                   <Media
                     fill
                     imgClassName="w-full h-full object-cover group-hover:scale-105 transition duration-500"

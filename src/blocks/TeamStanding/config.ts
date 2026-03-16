@@ -7,6 +7,9 @@ export const TeamStandingsBlock: Block = {
     singular: 'Team Standings',
     plural: 'Team Standings',
   },
+  admin: {
+    disableBlockName: true,
+  },
   fields: [
     {
       name: 'maleApiUrl',

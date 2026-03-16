@@ -20,9 +20,38 @@ export default async function Page() {
         select: {
             title: true,
             slug: true,
+            images: true,
             meta: true,
         },
     })
+
+    const galleriesWithFirstImage = await Promise.all(
+        galleries.docs.map(async (gallery) => {
+            const folderId = typeof gallery.images === 'number' ? gallery.images : gallery.images?.id
+
+            if (!folderId) return gallery
+
+            const folderMedia = await payload.find({
+                collection: 'media',
+                depth: 0,
+                limit: 1,
+                sort: 'createdAt',
+                where: {
+                    folder: {
+                        equals: folderId,
+                    },
+                },
+            })
+
+            return {
+                ...gallery,
+                meta: {
+                    ...gallery.meta,
+                    image: folderMedia.docs?.[0] || gallery.meta?.image,
+                },
+            }
+        }),
+    )
 
     // const galleries = await payload.find({
     //     collection: 'gallery'
@@ -46,7 +75,7 @@ export default async function Page() {
                 />
             </div>
 
-            <CollectionArchive posts={galleries.docs} relationTo="gallery" />
+            <CollectionArchive posts={galleriesWithFirstImage} relationTo="gallery" />
 
 
             <div className="container">
