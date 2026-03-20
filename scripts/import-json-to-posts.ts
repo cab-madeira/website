@@ -1,11 +1,10 @@
 import 'dotenv/config'
-import { getPayload } from 'payload'
-import config from '../src/payload.config'
+import { PayloadSDK } from '@payloadcms/sdk'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
-import { Post } from '@/payload-types'
+import type { Config } from '@/payload-types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -29,14 +28,68 @@ interface ImageIssue {
 const imageIssues: ImageIssue[] = []
 let postsFolderId: number | null = null
 
+function getSdkBaseURL(): string {
+  const fromEnv = process.env.PAYLOAD_API_URL || process.env.NEXT_PUBLIC_SERVER_URL
+
+  if (!fromEnv) {
+    throw new Error('Missing PAYLOAD_API_URL or NEXT_PUBLIC_SERVER_URL in environment variables.')
+  }
+
+  const normalized = fromEnv.endsWith('/') ? fromEnv.slice(0, -1) : fromEnv
+  return normalized.endsWith('/api') ? normalized : `${normalized}/api`
+}
+
+async function createSdkClient(): Promise<PayloadSDK<Config>> {
+  const sdk = new PayloadSDK<Config>({
+    baseURL: getSdkBaseURL(),
+  })
+
+  if (process.env.PAYLOAD_TOKEN) {
+    sdk.baseInit = {
+      ...sdk.baseInit,
+      headers: {
+        Authorization: `Bearer ${process.env.PAYLOAD_TOKEN}`,
+      },
+    }
+    return sdk
+  }
+
+  const email = process.env.PAYLOAD_IMPORT_EMAIL
+  const password = process.env.PAYLOAD_IMPORT_PASSWORD
+
+  if (!email || !password) {
+    throw new Error(
+      'Authentication required. Set PAYLOAD_TOKEN or PAYLOAD_IMPORT_EMAIL and PAYLOAD_IMPORT_PASSWORD.',
+    )
+  }
+
+  const loginResult = await sdk.login({
+    collection: 'users',
+    data: { email, password },
+  })
+
+  if (!loginResult.token) {
+    throw new Error('Payload login succeeded but no token was returned.')
+  }
+
+  sdk.baseInit = {
+    ...sdk.baseInit,
+    headers: {
+      Authorization: `Bearer ${loginResult.token}`,
+    },
+  }
+
+  return sdk
+}
+
 // Get or create the "posts" folder
-async function getOrCreatePostsFolder(payload: any): Promise<number | null> {
+async function getOrCreatePostsFolder(sdk: PayloadSDK<Config>): Promise<number | null> {
   if (postsFolderId) {
     return postsFolderId
   }
 
   // Check if "Posts" folder already exists
-  const existingFolders = await payload.find({
+  const existingFolders = await sdk.find({
     collection: 'payload-folders',
     where: {
       name: {
@@ -53,7 +106,7 @@ async function getOrCreatePostsFolder(payload: any): Promise<number | null> {
   }
 
   // Create the "Posts" folder
-  const newFolder = await payload.create({
+  const newFolder = await sdk.create({
     collection: 'payload-folders',
     data: {
       name: 'Posts',
@@ -127,7 +180,7 @@ function generateSlug(title: string, date: Date): string {
 }
 
 async function findOrCreateMedia(
-  payload: any,
+  sdk: PayloadSDK<Config>,
   imagePath: string,
   postTitle: string,
   postSlug: string,
@@ -164,7 +217,7 @@ async function findOrCreateMedia(
   }
 
   // Check if media already exists
-  const existingMedia = await payload.find({
+  const existingMedia = await sdk.find({
     collection: 'media',
     where: {
       filename: {
@@ -180,7 +233,7 @@ async function findOrCreateMedia(
   }
 
   // Get the "Posts" folder
-  const postsFolder = await getOrCreatePostsFolder(payload)
+  const postsFolder = await getOrCreatePostsFolder(sdk)
   if (!postsFolder) {
     console.log(`  ⚠ Could not create or find "Posts" folder`)
     return null
@@ -212,18 +265,15 @@ async function findOrCreateMedia(
 
     // Create media entry using Payload's upload API
     try {
-      const media = await payload.create({
+      const fileBytes = Uint8Array.from(processedBuffer)
+
+      const media = await sdk.create({
         collection: 'media',
         data: {
           alt: filename.replace(/\.[^/.]+$/, ''), // Remove extension for alt text
           folder: postsFolder, // Assign to "Posts" folder
         },
-        file: {
-          data: processedBuffer,
-          name: filename,
-          mimetype: mimetype,
-          size: processedBuffer.length,
-        },
+        file: new File([fileBytes], filename, { type: mimetype }),
       })
 
       console.log(
@@ -325,17 +375,17 @@ async function importPosts() {
   console.log('Starting post import...\n')
 
   // Initialize Payload
-  const payload = await getPayload({ config })
-  console.log('Payload initialized\n')
+  const sdk = await createSdkClient()
+  console.log('Payload SDK initialized\n')
 
   if (shouldDelete) {
     console.log('DELETE MODE: Deleting all posts and media in "Posts" folder...\n')
 
     // Initialize the "Posts" folder to get its ID
-    const postsFolderId = await getOrCreatePostsFolder(payload)
+    const postsFolderId = await getOrCreatePostsFolder(sdk)
 
     // Get all posts
-    const allPosts = await payload.find({
+    const allPosts = await sdk.find({
       collection: 'posts',
       limit: 1500, // Adjust if you have more than 1500 posts
     })
@@ -348,12 +398,9 @@ async function importPosts() {
     for (const post of allPosts.docs) {
       try {
         console.log(`Deleting post: "${post.title}" (${post.slug})`)
-        await payload.delete({
+        await sdk.delete({
           collection: 'posts',
           id: post.id,
-          context: {
-            disableRevalidate: true,
-          },
         })
         deletedPosts++
       } catch (error) {
@@ -363,7 +410,7 @@ async function importPosts() {
     }
 
     // Get all media in "Posts" folder only
-    const allMedia = await payload.find({
+    const allMedia = await sdk.find({
       collection: 'media',
       where: {
         folder: {
@@ -381,7 +428,7 @@ async function importPosts() {
     for (const media of allMedia.docs) {
       try {
         console.log(`Deleting media: "${media.filename}" (${media.id})`)
-        await payload.delete({
+        await sdk.delete({
           collection: 'media',
           id: media.id,
         })
@@ -406,7 +453,7 @@ async function importPosts() {
   }
 
   // Initialize the "Posts" folder for media uploads
-  await getOrCreatePostsFolder(payload)
+  await getOrCreatePostsFolder(sdk)
 
   // Continue with normal import logic...
 
@@ -465,7 +512,7 @@ async function importPosts() {
       const slug = generateSlug(jsonData.title, publishedAt)
 
       // Check if post already exists
-      const existingPost = await payload.find({
+      const existingPost = await sdk.find({
         collection: 'posts',
         where: {
           slug: {
@@ -484,7 +531,7 @@ async function importPosts() {
       // Try to find or create media
       let heroImageId = null
       if (jsonData.image) {
-        heroImageId = await findOrCreateMedia(payload, jsonData.image, jsonData.title, slug, folder)
+        heroImageId = await findOrCreateMedia(sdk, jsonData.image, jsonData.title, slug, folder)
       }
 
       // Convert body text to Lexical format with image at the beginning
@@ -518,12 +565,9 @@ async function importPosts() {
       }
 
       // Create the post (disable revalidation during import)
-      const result = await payload.create({
+      const result = await sdk.create({
         collection: 'posts',
         depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
         data: postData,
       })
 

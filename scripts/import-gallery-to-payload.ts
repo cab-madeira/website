@@ -1,10 +1,10 @@
 import 'dotenv/config'
-import { getPayload } from 'payload'
-import config from '../src/payload.config'
+import { PayloadSDK } from '@payloadcms/sdk'
 import { promises as fs } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
+import type { Config } from '@/payload-types'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -26,14 +26,68 @@ interface ImageIssue {
 const imageIssues: ImageIssue[] = []
 let galleriesFolderId: number | null = null
 
+function getSdkBaseURL(): string {
+  const fromEnv = process.env.PAYLOAD_API_URL || process.env.NEXT_PUBLIC_SERVER_URL
+
+  if (!fromEnv) {
+    throw new Error('Missing PAYLOAD_API_URL or NEXT_PUBLIC_SERVER_URL in environment variables.')
+  }
+
+  const normalized = fromEnv.endsWith('/') ? fromEnv.slice(0, -1) : fromEnv
+  return normalized.endsWith('/api') ? normalized : `${normalized}/api`
+}
+
+async function createSdkClient(): Promise<PayloadSDK<Config>> {
+  const sdk = new PayloadSDK<Config>({
+    baseURL: getSdkBaseURL(),
+  })
+
+  if (process.env.PAYLOAD_TOKEN) {
+    sdk.baseInit = {
+      ...sdk.baseInit,
+      headers: {
+        Authorization: `Bearer ${process.env.PAYLOAD_TOKEN}`,
+      },
+    }
+    return sdk
+  }
+
+  const email = process.env.PAYLOAD_IMPORT_EMAIL
+  const password = process.env.PAYLOAD_IMPORT_PASSWORD
+
+  if (!email || !password) {
+    throw new Error(
+      'Authentication required. Set PAYLOAD_TOKEN or PAYLOAD_IMPORT_EMAIL and PAYLOAD_IMPORT_PASSWORD.',
+    )
+  }
+
+  const loginResult = await sdk.login({
+    collection: 'users',
+    data: { email, password },
+  })
+
+  if (!loginResult.token) {
+    throw new Error('Payload login succeeded but no token was returned.')
+  }
+
+  sdk.baseInit = {
+    ...sdk.baseInit,
+    headers: {
+      Authorization: `Bearer ${loginResult.token}`,
+    },
+  }
+
+  return sdk
+}
+
 // Get or create the "Galleries" folder
-async function getOrCreateGalleriesFolder(payload: any): Promise<number | null> {
+async function getOrCreateGalleriesFolder(sdk: PayloadSDK<Config>): Promise<number | null> {
   if (galleriesFolderId) {
     return galleriesFolderId
   }
 
   // Check if "Galleries" folder already exists
-  const existingFolders = await payload.find({
+  const existingFolders = await sdk.find({
     collection: 'payload-folders',
     where: {
       name: {
@@ -50,7 +104,7 @@ async function getOrCreateGalleriesFolder(payload: any): Promise<number | null> 
   }
 
   // Create the "Galleries" folder
-  const newFolder = await payload.create({
+  const newFolder = await sdk.create({
     collection: 'payload-folders',
     data: {
       name: 'Galleries',
@@ -65,17 +119,17 @@ async function getOrCreateGalleriesFolder(payload: any): Promise<number | null> 
 
 // Get or create a gallery-specific folder inside "Galleries"
 async function getOrCreateGalleryFolder(
-  payload: any,
+  sdk: PayloadSDK<Config>,
   galleryTitle: string,
   gallerySlug: string,
 ): Promise<number | null> {
-  const parentFolderId = await getOrCreateGalleriesFolder(payload)
+  const parentFolderId = await getOrCreateGalleriesFolder(sdk)
   if (!parentFolderId) {
     return null
   }
 
   // Check if gallery folder already exists
-  const existingFolder = await payload.find({
+  const existingFolder = await sdk.find({
     collection: 'payload-folders',
     where: {
       and: [
@@ -100,7 +154,7 @@ async function getOrCreateGalleryFolder(
   }
 
   // Create the gallery folder
-  const newFolder = await payload.create({
+  const newFolder = await sdk.create({
     collection: 'payload-folders',
     data: {
       name: galleryTitle,
@@ -126,7 +180,7 @@ function generateSlug(title: string): string {
 }
 
 async function findOrCreateMedia(
-  payload: any,
+  sdk: PayloadSDK<Config>,
   imagePath: string,
   galleryTitle: string,
   gallerySlug: string,
@@ -161,7 +215,7 @@ async function findOrCreateMedia(
   }
 
   // Check if media already exists in this gallery folder
-  const existingMedia = await payload.find({
+  const existingMedia = await sdk.find({
     collection: 'media',
     where: {
       and: [
@@ -222,18 +276,15 @@ async function findOrCreateMedia(
 
     // Create media entry using Payload's upload API
     try {
-      const media = await payload.create({
+      const fileBytes = Uint8Array.from(processedBuffer)
+
+      const media = await sdk.create({
         collection: 'media',
         data: {
           alt: filename.replace(/\.[^/.]+$/, ''), // Remove extension for alt text
           folder: galleryFolderId, // Assign to gallery-specific folder
         },
-        file: {
-          data: processedBuffer,
-          name: filename,
-          mimetype: mimetype,
-          size: processedBuffer.length,
-        },
+        file: new File([fileBytes], filename, { type: mimetype }),
       })
 
       return media.id
@@ -337,8 +388,8 @@ async function importGalleries() {
   console.log('Starting gallery import...\n')
 
   // Initialize Payload
-  const payload = await getPayload({ config })
-  console.log('Payload initialized\n')
+  const sdk = await createSdkClient()
+  console.log('Payload SDK initialized\n')
 
   if (shouldDelete) {
     console.log(
@@ -346,10 +397,10 @@ async function importGalleries() {
     )
 
     // Initialize the "Galleries" folder to get its ID
-    const galleriesFolderId = await getOrCreateGalleriesFolder(payload)
+    const galleriesFolderId = await getOrCreateGalleriesFolder(sdk)
 
     // Get all galleries
-    const allGalleries = await payload.find({
+    const allGalleries = await sdk.find({
       collection: 'gallery',
       limit: 1000,
     })
@@ -362,12 +413,9 @@ async function importGalleries() {
     for (const gallery of allGalleries.docs) {
       try {
         console.log(`Deleting gallery: "${gallery.title}" (${gallery.slug})`)
-        await payload.delete({
+        await sdk.delete({
           collection: 'gallery',
           id: gallery.id,
-          context: {
-            disableRevalidate: true,
-          },
         })
         deletedGalleries++
       } catch (error) {
@@ -377,7 +425,7 @@ async function importGalleries() {
     }
 
     // Get all subfolders under "Galleries"
-    const allSubfolders = await payload.find({
+    const allSubfolders = await sdk.find({
       collection: 'payload-folders',
       where: {
         folder: {
@@ -399,7 +447,7 @@ async function importGalleries() {
       console.log(`Processing subfolder: "${subfolder.name}"`)
 
       // Get all media in this subfolder
-      const subfolderMedia = await payload.find({
+      const subfolderMedia = await sdk.find({
         collection: 'media',
         where: {
           folder: {
@@ -415,7 +463,7 @@ async function importGalleries() {
       for (const media of subfolderMedia.docs) {
         try {
           console.log(`  Deleting media: "${media.filename}" (${media.id})`)
-          await payload.delete({
+          await sdk.delete({
             collection: 'media',
             id: media.id,
           })
@@ -429,7 +477,7 @@ async function importGalleries() {
       // Delete the subfolder
       try {
         console.log(`  Deleting folder: "${subfolder.name}" (${subfolder.id})`)
-        await payload.delete({
+        await sdk.delete({
           collection: 'payload-folders',
           id: subfolder.id,
         })
@@ -458,7 +506,7 @@ async function importGalleries() {
   }
 
   // Initialize the "Galleries" folder for media uploads
-  await getOrCreateGalleriesFolder(payload)
+  await getOrCreateGalleriesFolder(sdk)
 
   // Continue with normal import logic...
 
@@ -514,7 +562,7 @@ async function importGalleries() {
       const slug = generateSlug(jsonData.title)
 
       // Check if gallery already exists
-      const existingGallery = await payload.find({
+      const existingGallery = await sdk.find({
         collection: 'gallery',
         where: {
           slug: {
@@ -531,7 +579,7 @@ async function importGalleries() {
       }
 
       // Create or get gallery-specific folder
-      const galleryFolderId = await getOrCreateGalleryFolder(payload, jsonData.title, slug)
+      const galleryFolderId = await getOrCreateGalleryFolder(sdk, jsonData.title, slug)
       if (!galleryFolderId) {
         console.log(`  Could not create folder for gallery "${jsonData.title}", skipping...\n`)
         errors++
@@ -544,7 +592,7 @@ async function importGalleries() {
 
       for (const imagePath of jsonData.images) {
         const mediaId = await findOrCreateMedia(
-          payload,
+          sdk,
           imagePath,
           jsonData.title,
           slug,
@@ -576,12 +624,9 @@ async function importGalleries() {
       }
 
       // Create the gallery (disable revalidation during import)
-      const result = await payload.create({
+      const result = await sdk.create({
         collection: 'gallery',
         depth: 0,
-        context: {
-          disableRevalidate: true,
-        },
         data: galleryData,
       })
 

@@ -13,6 +13,7 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '@/hooks/populatePublishedAt'
+import { revalidateGallery, revalidateGalleryDelete } from './hooks/revalidateGallery'
 
 export const Gallery: CollectionConfig<'gallery'> = {
   slug: 'gallery',
@@ -114,6 +115,8 @@ export const Gallery: CollectionConfig<'gallery'> = {
     slugField(),
   ],
   hooks: {
+    afterChange: [revalidateGallery],
+    afterDelete: [revalidateGalleryDelete],
     beforeChange: [populatePublishedAt],
   },
 }

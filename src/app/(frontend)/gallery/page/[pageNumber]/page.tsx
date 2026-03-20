@@ -101,7 +101,7 @@ export async function generateStaticParams() {
     collection: 'gallery',
   })
 
-  const totalPages = Math.ceil(totalDocs / 10)
+  const totalPages = Math.ceil(totalDocs / 12)
 
   const pages: { pageNumber: string }[] = []
 
