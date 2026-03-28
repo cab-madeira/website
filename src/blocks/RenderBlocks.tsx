@@ -76,27 +76,34 @@ export const RenderBlocks: React.FC<{
 
           {/* Sidebar layout */}
           {hasSidebarBlocks && (
-            <div className="lg:col-span-1">
-              {sidebarBlocks.map((block, index) => {
-                const { blockType } = block as {
-                  blockType?: keyof typeof sidebarBlockComponents
-                }
-
-                if (blockType && blockType in sidebarBlockComponents) {
-                  const Block = sidebarBlockComponents[blockType]
-
-                  if (Block) {
-                    return (
-                      <div className="my-16" key={index}>
-                        {/* @ts-expect-error */}
-                        <Block {...block} disableInnerContainer />
-                      </div>
-                    )
+            <>
+              <div className="my-3 flex items-center gap-3 sm:my-4 lg:hidden" aria-hidden="true">
+                <span className="h-px flex-1 bg-[hsl(var(--primary))] opacity-30" />
+                <span className="h-2.5 w-2.5 rounded-full border border-[hsl(var(--primary))] bg-[hsl(var(--background))]" />
+                <span className="h-px flex-1 bg-[hsl(var(--primary))] opacity-30" />
+              </div>
+              <div className="lg:col-span-1">
+                {sidebarBlocks.map((block, index) => {
+                  const { blockType } = block as {
+                    blockType?: keyof typeof sidebarBlockComponents
                   }
-                }
-                return null
-              })}
-            </div>
+
+                  if (blockType && blockType in sidebarBlockComponents) {
+                    const Block = sidebarBlockComponents[blockType]
+
+                    if (Block) {
+                      return (
+                        <div className="my-16" key={index}>
+                          {/* @ts-expect-error */}
+                          <Block {...block} disableInnerContainer />
+                        </div>
+                      )
+                    }
+                  }
+                  return null
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>

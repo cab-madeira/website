@@ -93,46 +93,49 @@ export function NextMatchCard({
 
                 {/* Match Content */}
                 {event ? (
-                    <div className="px-4 py-4"
+                    <div
+                        className="px-4 py-4 min-h-[160px] flex flex-col justify-between"
                         style={{ backgroundColor: 'hsl(var(--secondary))' }}
                     >
-                        <div
-                            className="text-xs font-semibold mb-2 text-center"
-                        >
-                            {event.competition}
+                        <div>
+                            <div className="text-xs font-semibold mb-2 text-center">
+                                {event.competition}
+                            </div>
+
+                            <div className="grid grid-cols-3 items-stretch text-center mb-4">
+                                <div
+                                    className="text-sm font-medium py-2 rounded flex items-center justify-center h-12"
+                                    style={{
+                                        backgroundColor:
+                                            event.homeTeam === 'CAB Madeira'
+                                                ? 'hsl(var(--yellow))'
+                                                : 'hsl(var(--primary))',
+                                        color: 'hsl(var(--primary-foreground))',
+                                    }}
+                                >
+                                    {event.homeTeam}
+                                </div>
+
+                                <div className="text-xs font-semibold flex items-center justify-center h-12">
+                                    VS
+                                </div>
+
+                                <div
+                                    className="text-sm font-medium py-2 rounded flex items-center justify-center h-12"
+                                    style={{
+                                        backgroundColor:
+                                            event.awayTeam === 'CAB Madeira'
+                                                ? 'hsl(var(--yellow))'
+                                                : 'hsl(var(--primary))',
+                                        color: 'hsl(var(--primary-foreground))',
+                                    }}
+                                >
+                                    {event.awayTeam}
+                                </div>
+                            </div>
                         </div>
-
-                        <div className="grid grid-cols-3 items-stretch text-center mb-4">
-                            <div
-                                className="text-sm font-medium py-2 rounded flex items-center justify-center h-12"
-                                style={{
-                                    backgroundColor:
-                                        event.homeTeam === 'CAB Madeira' ? 'hsl(var(--yellow))' : 'hsl(var(--primary))',
-                                    color: 'hsl(var(--primary-foreground))',
-                                }}
-                            >
-                                {event.homeTeam}
-                            </div>
-
-                            <div className="text-xs font-semibold flex items-center justify-center h-12">
-                                VS
-                            </div>
-
-                            <div
-                                className="text-sm font-medium py-2 rounded flex items-center justify-center h-12"
-                                style={{
-                                    backgroundColor:
-                                        event.awayTeam === 'CAB Madeira' ? 'hsl(var(--yellow))' : 'hsl(var(--primary))',
-                                    color: 'hsl(var(--primary-foreground))',
-                                }}
-                            >
-                                {event.awayTeam}
-                            </div>
-                        </div>
-
 
                         <div className="flex justify-between text-sm font-medium border-t dark:border-[hsl(var(--primary))] pt-3">
-
                             <span>
                                 {new Date(`${event.date}T${event.time}`).toLocaleDateString(
                                     'pt-PT',
@@ -147,7 +150,10 @@ export function NextMatchCard({
                         </div>
                     </div>
                 ) : (
-                    <div className="px-4 py-6 text-sm text-center ">
+                    <div
+                        className="px-4 py-6 min-h-[160px] flex items-center justify-center text-sm text-center"
+                        style={{ backgroundColor: 'hsl(var(--secondary))' }}
+                    >
                         No upcoming match available.
                     </div>
                 )}
