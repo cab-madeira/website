@@ -16,18 +16,12 @@ export const NextMatchBlock: Block = {
             label: 'Male Team Game Schedule API URL',
             type: 'text',
             required: true,
-            admin: {
-                placeholder: 'https://example.com/api/standings?gender=male',
-            },
         },
         {
             name: 'femaleApiUrl',
             label: 'Female Team Game Schedule API URL',
             type: 'text',
             required: true,
-            admin: {
-                placeholder: 'https://example.com/api/standings?gender=female',
-            },
         },
     ],
 }

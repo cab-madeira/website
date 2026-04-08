@@ -8,12 +8,16 @@ import { Media } from '@/components/Media'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
+import { useTranslations } from 'next-intl'
+
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
   }
 > = async (props) => {
+  const t = useTranslations('ArchiveBlock')
+
   const { id } = props
 
   const payload = await getPayload({ config: configPromise })
@@ -35,7 +39,7 @@ export const ArchiveBlock: React.FC<
     <section id={`block-${id}`}>
       <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-6 px-4">
         {/* Reusable title */}
-        <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">Latest News</h2>
+        <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">{t('title')}</h2>
 
 
         <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
@@ -101,7 +105,7 @@ export const ArchiveBlock: React.FC<
 
         <div className="mt-6 text-center">
           <Button asChild variant="default">
-            <Link href="/posts">More News</Link>
+            <Link href="/posts">{t('moreNews')}</Link>
           </Button>
         </div>
       </div>

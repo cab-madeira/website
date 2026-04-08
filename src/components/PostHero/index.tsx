@@ -9,7 +9,7 @@ import { formatAuthors } from '@/utilities/formatAuthors'
 export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
-  const { categories, heroImage, populatedAuthors, publishedAt, title } = post
+  const { heroImage, populatedAuthors, publishedAt, title } = post
 
   const hasAuthors =
     populatedAuthors && populatedAuthors.length > 0 && formatAuthors(populatedAuthors) !== ''
@@ -18,25 +18,6 @@ export const PostHero: React.FC<{
     <div className="relative w-full">
       {/* Text content at top, centered */}
       <div className="container mx-auto text-center z-60 relative">
-        {categories && (
-          <div className="uppercase text-sm mb-4 inline-block">
-            {categories.map((category, index) => {
-              if (typeof category === 'object' && category !== null) {
-                const { title: categoryTitle } = category
-                const titleToUse = categoryTitle || 'Untitled category'
-                const isLast = index === categories.length - 1
-                return (
-                  <React.Fragment key={index}>
-                    {titleToUse}
-                    {!isLast && <span>, </span>}
-                  </React.Fragment>
-                )
-              }
-              return null
-            })}
-          </div>
-        )}
-
         <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title}</h1>
 
         <div className="flex flex-col md:flex-row justify-center gap-8 text-center md:text-left">

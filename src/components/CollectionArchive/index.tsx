@@ -67,7 +67,6 @@ export const CollectionArchive: React.FC<Props> = (props) => {
                     className="h-full"
                     doc={cardDoc}
                     relationTo={relationTo}
-                    showCategories={relationTo === 'posts'}
                   />
                 </div>
               )

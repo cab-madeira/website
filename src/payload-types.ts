@@ -70,7 +70,6 @@ export interface Config {
     pages: Page;
     posts: Post;
     media: Media;
-    categories: Category;
     users: User;
     gallery: Gallery;
     redirects: Redirect;
@@ -93,7 +92,6 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     gallery: GallerySelect<false> | GallerySelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -114,12 +112,10 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
-    globalAPI: GlobalAPI;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
-    globalAPI: GlobalAPISelect<false> | GlobalAPISelect<true>;
   };
   locale: 'en' | 'pt';
   widgets: {
@@ -395,7 +391,6 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  categories?: (number | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -420,30 +415,6 @@ export interface Post {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: number;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  parent?: (number | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (number | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -739,7 +710,7 @@ export interface DiviserBlock {
  * via the `definition` "ShopFeaturedBlock".
  */
 export interface ShopFeaturedBlock {
-  apiField: 'shopAPI';
+  shopApiUrl: string;
   id?: string | null;
   blockName?: string | null;
   blockType: 'shopFeaturedBlock';
@@ -892,14 +863,6 @@ export interface Search {
     description?: string | null;
     image?: (number | null) | Media;
   };
-  categories?:
-    | {
-        relationTo?: string | null;
-        categoryID?: string | null;
-        title?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1030,10 +993,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
@@ -1254,7 +1213,7 @@ export interface DiviserBlockSelect<T extends boolean = true> {
  * via the `definition` "ShopFeaturedBlock_select".
  */
 export interface ShopFeaturedBlockSelect<T extends boolean = true> {
-  apiField?: T;
+  shopApiUrl?: T;
   id?: T;
   blockName?: T;
 }
@@ -1321,7 +1280,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   content?: T;
-  categories?: T;
   meta?:
     | T
     | {
@@ -1436,26 +1394,6 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_select".
- */
-export interface CategoriesSelect<T extends boolean = true> {
-  title?: T;
-  generateSlug?: T;
-  slug?: T;
-  parent?: T;
-  breadcrumbs?:
-    | T
-    | {
-        doc?: T;
-        url?: T;
-        label?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1681,14 +1619,6 @@ export interface SearchSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
-  categories?:
-    | T
-    | {
-        relationTo?: T;
-        categoryID?: T;
-        title?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1835,16 +1765,6 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "globalAPI".
- */
-export interface GlobalAPI {
-  id: number;
-  shopAPI: string;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1885,16 +1805,6 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "globalAPI_select".
- */
-export interface GlobalAPISelect<T extends boolean = true> {
-  shopAPI?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

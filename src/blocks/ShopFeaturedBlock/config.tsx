@@ -12,16 +12,10 @@ export const ShopFeaturedBlock: Block = {
     },
     fields: [
         {
-            name: 'apiField',
-            label: 'API Variable',
-            type: 'select',
+            name: 'shopApiUrl',
+            label: 'Shop API URL',
+            type: 'text',
             required: true,
-            options: [
-                {
-                    label: 'Shop API URL',
-                    value: 'shopAPI',
-                },
-            ],
         },
     ],
 }

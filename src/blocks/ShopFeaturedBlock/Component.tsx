@@ -1,6 +1,5 @@
 import { fetchUtil } from '@/utilities/fetchUtil'
 import type {
-    GlobalAPI,
     ShopFeaturedBlock as ShopFeaturedProps,
 } from '@/payload-types'
 import { getCachedGlobal } from '@/utilities/getGlobals'
@@ -16,10 +15,8 @@ type Product = {
 }
 
 export const ShopFeaturedBlock: React.FC<ShopFeaturedProps> = async ({
-    apiField,
+    shopApiUrl,
 }) => {
-    const globalAPI = (await getCachedGlobal('globalAPI', 1)()) as GlobalAPI
-    const shopApiUrl = globalAPI[apiField]
 
     if (!shopApiUrl) {
         return <ShopFeatured products={[]} />

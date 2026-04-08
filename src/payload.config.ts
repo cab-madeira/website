@@ -6,14 +6,12 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { Categories } from './collections/Categories'
 import { Gallery } from './collections/Gallery'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
-import { GlobalAPI } from './GlobalAPI/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
@@ -67,9 +65,9 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URI || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Gallery],
+  collections: [Pages, Posts, Media, Users, Gallery],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, GlobalAPI],
+  globals: [Header, Footer],
   plugins: [...plugins],
   localization: {
     defaultLocale: localization.defaultLocale,
