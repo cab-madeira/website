@@ -3,6 +3,7 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import {
     Carousel,
@@ -24,10 +25,11 @@ type GalleryFeaturedProps = {
 
 export const GalleryFeatured: React.FC<GalleryFeaturedProps> = (props) => {
     const { galleryThumbnails } = props
+    const t = useTranslations('GalleryBlock')
 
     return (
         <div className="flex flex-col items-center gap-6 w-full">
-            <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">Featured Gallery</h2>
+            <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">{t('featuredTitle')}</h2>
 
             <Carousel>
                 <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4">
@@ -63,7 +65,7 @@ export const GalleryFeatured: React.FC<GalleryFeaturedProps> = (props) => {
 
             <div className="mt-6 text-center">
                 <Button asChild variant="default">
-                    <Link href="/gallery">View Full Gallery</Link>
+                    <Link href="/gallery">{t('viewFull')}</Link>
                 </Button>
             </div>
 

@@ -4,6 +4,7 @@ import type { FieldErrorsImpl, FieldValues, UseFormRegister } from 'react-hook-f
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
@@ -14,6 +15,8 @@ export const Text: React.FC<
     register: UseFormRegister<FieldValues>
   }
 > = ({ name, defaultValue, errors, label, register, required, width }) => {
+  const t = useTranslations('Form')
+
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -21,7 +24,7 @@ export const Text: React.FC<
 
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{t('required')}</span>
           </span>
         )}
       </Label>

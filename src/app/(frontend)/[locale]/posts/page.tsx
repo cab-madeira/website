@@ -7,17 +7,31 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
+import { normalizeLocale, type PayloadLocale } from '@/i18n/routing'
+import { getTranslations } from 'next-intl/server'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page() {
+type Args = {
+  params: Promise<{
+    locale?: PayloadLocale
+  }>
+}
+
+
+export default async function Page({ params: paramsPromise }: Args) {
   const payload = await getPayload({ config: configPromise })
+  const { locale: localeParam = 'pt' } = await paramsPromise
+  const locale = normalizeLocale(localeParam)
+  const t = await getTranslations({ locale, namespace: 'PostsPage' })
+
 
   const posts = await payload.find({
     collection: 'posts',
     depth: 1,
     limit: 12,
+    locale,
     overrideAccess: false,
     select: {
       title: true,
@@ -32,7 +46,7 @@ export default async function Page() {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Posts</h1>
+          <h1>{t('title')}</h1>
         </div>
       </div>
 
@@ -56,8 +70,12 @@ export default async function Page() {
   )
 }
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+  const { locale: localeParam = 'pt' } = await paramsPromise
+  const locale = normalizeLocale(localeParam)
+  const t = await getTranslations({ locale, namespace: 'PostsPage' })
+
   return {
-    title: `Payload Website Template Posts`,
+    title: t('title'),
   }
 }

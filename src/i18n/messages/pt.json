@@ -1,0 +1,101 @@
+{
+  "Header": {
+    "search": "Pesquisar"
+  },
+  "HeaderNav": {
+    "openMenu": "Abrir menu",
+    "navigation": "Navegação",
+    "closeMenu": "Fechar menu"
+  },
+  "Footer": {
+    "rightsReserved": "Todos os direitos reservados",
+    "builtWith": "Criado com",
+    "payloadCms": "Payload CMS"
+  },
+  "ShopPage": {
+    "title": "Loja",
+    "metaTitle": "Loja",
+    "orderProducts": "Ordenar produtos",
+    "sortNameAsc": "Nome (A-Z)",
+    "sortNameDesc": "Nome (Z-A)",
+    "sortPriceAsc": "Preco (Baixo para Alto)",
+    "sortPriceDesc": "Preco (Alto para Baixo)"
+  },
+  "SearchPage": {
+    "title": "Pesquisa",
+    "metaTitle": "Pesquisa",
+    "noResults": "Nenhum resultado encontrado."
+  },
+  "Search": {
+    "label": "Pesquisa",
+    "placeholder": "Pesquisar",
+    "submit": "Submeter"
+  },
+  "GalleryPage": {
+    "title": "Galerias",
+    "metaTitle": "Galerias"
+  },
+  "PostsPage": {
+    "title": "Artigos"
+  },
+  "GalleryBlock": {
+    "featuredTitle": "Galeria em Destaque",
+    "viewFull": "Ver Galeria Completa"
+  },
+  "ArchiveBlock": {
+    "title": "Ultimas Noticias",
+    "moreNews": "Mais Noticias"
+  },
+  "ShopFeaturedBlock": {
+    "featuredTitle": "Produtos em Destaque",
+    "viewFull": "Ver Loja Completa"
+  },
+  "NextMatchBlock": {
+    "title": "Proximo Jogo",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "maleTeam": "Equipa Masculina",
+    "femaleTeam": "Equipa Feminina",
+    "noUpcoming": "Nao ha proximos jogos disponiveis."
+  },
+  "TeamStanding": {
+    "title": "Classificacoes",
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "maleTeam": "Equipa Masculina",
+    "femaleTeam": "Equipa Feminina",
+    "team": "Equipa"
+  },
+  "Pagination": {
+    "previous": "Anterior",
+    "next": "Seguinte",
+    "goToPreviousPage": "Ir para a pagina anterior",
+    "goToNextPage": "Ir para a pagina seguinte",
+    "noResults": "A pesquisa nao produziu resultados.",
+    "showing": "A mostrar",
+    "of": "de"
+  },
+  "Carousel": {
+    "previousSlide": "Slide anterior",
+    "nextSlide": "Proximo slide"
+  },
+  "PageRange": {
+    "docsPlural": "Documentos",
+    "docSingular": "Documento",
+    "postsPlural": "Artigos",
+    "postSingular": "Artigo",
+    "galleriesPlural": "Galerias",
+    "gallerySingular": "Galeria"
+  },
+  "Form": {
+    "contactTitle": "Contacto",
+    "loading": "A carregar, por favor aguarde...",
+    "errorGeneric": "Algo correu mal.",
+    "required": "(obrigatorio)",
+    "fieldRequired": "Este campo e obrigatorio"
+  },
+  "Code": {
+    "copy": "Copiar",
+    "copied": "Copiado!"
+  }
+}

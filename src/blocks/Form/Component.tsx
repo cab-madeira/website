@@ -7,6 +7,7 @@ import { useForm, FormProvider } from 'react-hook-form'
 import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import { useTranslations } from 'next-intl'
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
@@ -41,6 +42,7 @@ export const FormBlock: React.FC<
   const [hasSubmitted, setHasSubmitted] = useState<boolean>()
   const [error, setError] = useState<{ message: string; status?: string } | undefined>()
   const router = useRouter()
+  const t = useTranslations('Form')
 
   const onSubmit = useCallback(
     (data: FormFieldBlock[]) => {
@@ -99,20 +101,20 @@ export const FormBlock: React.FC<
           console.warn(err)
           setIsLoading(false)
           setError({
-            message: 'Something went wrong.',
+            message: t('errorGeneric'),
           })
         }
       }
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType],
+    [router, formID, redirect, confirmationType, t],
   )
 
   return (
     <div className="w-full max-w-6xl flex flex-col gap-6">
       <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">
-        Contact Us
+        {t('contactTitle')}
       </h2>
 
       <div
@@ -145,7 +147,7 @@ export const FormBlock: React.FC<
             {!isLoading && hasSubmitted && confirmationType === 'message' && (
               <RichText data={confirmationMessage} />
             )}
-            {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
+            {isLoading && !hasSubmitted && <p>{t('loading')}</p>}
             {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
             {!hasSubmitted && (
               <form id={formID} onSubmit={handleSubmit(onSubmit)}>

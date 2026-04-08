@@ -1,0 +1,101 @@
+{
+  "Header": {
+    "search": "Search"
+  },
+  "HeaderNav": {
+    "openMenu": "Open menu",
+    "navigation": "Navigation",
+    "closeMenu": "Close menu"
+  },
+  "Footer": {
+    "rightsReserved": "All Rights Reserved",
+    "builtWith": "Built with",
+    "payloadCms": "Payload CMS"
+  },
+  "ShopPage": {
+    "title": "Shop",
+    "metaTitle": "Shop",
+    "orderProducts": "Order products",
+    "sortNameAsc": "Name (A-Z)",
+    "sortNameDesc": "Name (Z-A)",
+    "sortPriceAsc": "Price (Low to High)",
+    "sortPriceDesc": "Price (High to Low)"
+  },
+  "SearchPage": {
+    "title": "Search",
+    "metaTitle": "Search",
+    "noResults": "No results found."
+  },
+  "Search": {
+    "label": "Search",
+    "placeholder": "Search",
+    "submit": "Submit"
+  },
+  "GalleryPage": {
+    "title": "Galleries",
+    "metaTitle": "Galleries"
+  },
+  "PostsPage": {
+    "title": "Posts"
+  },
+  "GalleryBlock": {
+    "featuredTitle": "Featured Gallery",
+    "viewFull": "View Full Gallery"
+  },
+  "ArchiveBlock": {
+    "title": "Latest News",
+    "moreNews": "More News"
+  },
+  "ShopFeaturedBlock": {
+    "featuredTitle": "Featured Products",
+    "viewFull": "View Full Shop"
+  },
+  "NextMatchBlock": {
+    "title": "Next Match",
+    "previous": "Previous",
+    "next": "Next",
+    "maleTeam": "Male Team",
+    "femaleTeam": "Female Team",
+    "noUpcoming": "No upcoming match available."
+  },
+  "TeamStanding": {
+    "title": "Rankings",
+    "previous": "Previous",
+    "next": "Next",
+    "maleTeam": "Male Team",
+    "femaleTeam": "Female Team",
+    "team": "Team"
+  },
+  "Pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "goToPreviousPage": "Go to previous page",
+    "goToNextPage": "Go to next page",
+    "noResults": "Search produced no results.",
+    "showing": "Showing",
+    "of": "of"
+  },
+  "Carousel": {
+    "previousSlide": "Previous slide",
+    "nextSlide": "Next slide"
+  },
+  "PageRange": {
+    "docsPlural": "Docs",
+    "docSingular": "Doc",
+    "postsPlural": "Posts",
+    "postSingular": "Post",
+    "galleriesPlural": "Galleries",
+    "gallerySingular": "Gallery"
+  },
+  "Form": {
+    "contactTitle": "Contact Us",
+    "loading": "Loading, please wait...",
+    "errorGeneric": "Something went wrong.",
+    "required": "(required)",
+    "fieldRequired": "This field is required"
+  },
+  "Code": {
+    "copy": "Copy",
+    "copied": "Copied!"
+  }
+}

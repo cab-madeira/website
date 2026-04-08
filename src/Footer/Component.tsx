@@ -1,12 +1,15 @@
 import React from 'react'
+import { getTranslations } from 'next-intl/server'
 
 import type { Footer } from '@/payload-types'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
+import type { Locale } from '@/i18n/routing'
 
-export async function Footer() {
+export async function Footer({ locale }: { locale: Locale }) {
   const footerData: Footer = await getCachedGlobal('footer', 1)()
+  const t = await getTranslations({ locale, namespace: 'Footer' })
 
   const navItems = footerData?.navItems || []
 
@@ -35,7 +38,7 @@ export async function Footer() {
 
         {/* Copyright */}
         <span className="block text-sm text-[hsl(var(--secondary))]  dark:text-[hsl(var(--primary))]">
-          © {new Date().getFullYear()} CAB MADEIRA™. All Rights Reserved. Built with{' '}
+          © {new Date().getFullYear()} CAB MADEIRA™. {t('rightsReserved')} {t('builtWith')}{' '}
           <a
             href="https://payloadcms.com/"
             className="text-[hsl(var(--yellow))] hover:underline  dark:text-[hsl(var(--primary))]"

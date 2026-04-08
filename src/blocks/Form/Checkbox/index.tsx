@@ -6,6 +6,7 @@ import { useFormContext } from 'react-hook-form'
 import { Checkbox as CheckboxUi } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import React from 'react'
+import { useTranslations } from 'next-intl'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
@@ -18,6 +19,7 @@ export const Checkbox: React.FC<
 > = ({ name, defaultValue, errors, label, register, required, width }) => {
   const props = register(name, { required: required })
   const { setValue } = useFormContext()
+  const t = useTranslations('Form')
 
   return (
     <Width width={width}>
@@ -33,7 +35,7 @@ export const Checkbox: React.FC<
         <Label htmlFor={name}>
           {required && (
             <span className="required">
-              * <span className="sr-only">(required)</span>
+              * <span className="sr-only">{t('required')}</span>
             </span>
           )}
           {label}

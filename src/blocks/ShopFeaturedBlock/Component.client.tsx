@@ -3,6 +3,7 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 import {
     Carousel,
@@ -26,12 +27,13 @@ type Props = {
 }
 
 export const ShopFeatured: React.FC<Props> = ({ products }) => {
+    const t = useTranslations('ShopFeaturedBlock')
 
 
     return (
         <div className="flex flex-col items-center gap-6 w-full">
             <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">
-                Featured Products
+                {t('featuredTitle')}
             </h2>
 
             <Carousel>
@@ -77,7 +79,7 @@ export const ShopFeatured: React.FC<Props> = ({ products }) => {
 
             <div className="mt-6 text-center">
                 <Button asChild variant="default">
-                    <Link href="/shop">View Full Shop</Link>
+                    <Link href="/shop">{t('viewFull')}</Link>
                 </Button>
             </div>
         </div>

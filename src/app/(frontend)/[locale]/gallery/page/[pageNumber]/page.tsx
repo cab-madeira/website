@@ -7,18 +7,23 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
+import { normalizeLocale } from '@/i18n/routing'
 
 export const revalidate = 600
 
 type Args = {
   params: Promise<{
+    locale?: string
     pageNumber: string
   }>
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
-  const { pageNumber } = await paramsPromise
+  const { locale: localeParam, pageNumber } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
+  const locale = normalizeLocale(localeParam)
+  const t = await getTranslations({ locale, namespace: 'GalleryPage' })
 
   const sanitizedPageNumber = Number(pageNumber)
 
@@ -64,7 +69,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose dark:prose-invert max-w-none">
-          <h1>Galleries</h1>
+          <h1>{t('title')}</h1>
         </div>
       </div>
 
@@ -89,9 +94,11 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { pageNumber } = await paramsPromise
+  const { locale: localeParam, pageNumber } = await paramsPromise
+  const locale = normalizeLocale(localeParam)
+  const t = await getTranslations({ locale, namespace: 'GalleryPage' })
   return {
-    title: `Payload Website Template Posts Page ${pageNumber || ''}`,
+    title: `${t('title')} ${pageNumber || ''}`,
   }
 }
 

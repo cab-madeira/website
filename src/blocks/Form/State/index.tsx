@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/select'
 import React from 'react'
 import { Controller } from 'react-hook-form'
+import { useTranslations } from 'next-intl'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
@@ -22,13 +23,15 @@ export const State: React.FC<
     errors: Partial<FieldErrorsImpl>
   }
 > = ({ name, control, errors, label, required, width }) => {
+  const t = useTranslations('Form')
+
   return (
     <Width width={width}>
       <Label htmlFor={name}>
         {label}
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{t('required')}</span>
           </span>
         )}
       </Label>

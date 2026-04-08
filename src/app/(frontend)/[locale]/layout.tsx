@@ -15,12 +15,21 @@ import { draftMode } from 'next/headers'
 
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
+import { normalizeLocale } from '@/i18n/routing'
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+type Args = {
+  params: Promise<{
+    locale?: string
+  }>
+}
+
+export default async function RootLayout({ children, params: paramsPromise }: React.PropsWithChildren<Args>) {
   const { isEnabled } = await draftMode()
+  const { locale: localeParam } = await paramsPromise
+  const locale = normalizeLocale(localeParam)
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html className={cn(GeistSans.variable, GeistMono.variable)} lang={locale} suppressHydrationWarning>
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
@@ -36,7 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
           <Header />
           {children}
-          <Footer />
+          <Footer locale={locale} />
         </Providers>
       </body>
     </html>

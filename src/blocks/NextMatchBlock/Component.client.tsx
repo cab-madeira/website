@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react'
 import { ChevronRightCircle, ChevronLeftCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type GameEvent = {
     date: string
@@ -23,6 +24,7 @@ export function NextMatchCard({
 }: Props) {
     const tabs: ('male' | 'female')[] = ['male', 'female']
     const [currentTabIndex, setCurrentTabIndex] = useState(0)
+    const t = useTranslations('NextMatchBlock')
 
     const goNext = (e: React.MouseEvent<HTMLButtonElement>) => {
         setCurrentTabIndex((prev) => (prev + 1) % tabs.length)
@@ -51,7 +53,7 @@ export function NextMatchCard({
                     <button
                         type="button"
                         className="p-1 rounded hover:bg-white/10"
-                        aria-label="Previous"
+                        aria-label={t('previous')}
                         onClick={goPrev}
                     >
                         <ChevronLeftCircle size={22} />
@@ -60,7 +62,7 @@ export function NextMatchCard({
                     <button
                         type="button"
                         className="p-1 rounded hover:bg-white/10"
-                        aria-label="Next"
+                        aria-label={t('next')}
                         onClick={goNext}
                     >
                         <ChevronRightCircle size={22} />
@@ -68,7 +70,7 @@ export function NextMatchCard({
                 </div>
 
                 <div className="whitespace-nowrap text-right">
-                    {activeTab === 'male' ? 'Male Team' : 'Female Team'}
+                    {activeTab === 'male' ? t('maleTeam') : t('femaleTeam')}
                 </div>
             </div>
 
@@ -83,7 +85,7 @@ export function NextMatchCard({
         <div className="flex flex-col items-center gap-6">
 
             {/* Reusable title */}
-            <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">Next Match</h2>
+            <h2 className="text-2xl font-bold text-center text-[hsl(var(--primary))]">{t('title')}</h2>
 
             <div
                 className="w-full max-w-sm shadow-md rounded-lg overflow-hidden border"
@@ -154,7 +156,7 @@ export function NextMatchCard({
                         className="px-4 py-6 min-h-[160px] flex items-center justify-center text-sm text-center"
                         style={{ backgroundColor: 'hsl(var(--secondary))' }}
                     >
-                        No upcoming match available.
+                        {t('noUpcoming')}
                     </div>
                 )}
             </div>

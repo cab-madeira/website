@@ -1,8 +1,8 @@
 'use client'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
+import { Link, usePathname } from '@/i18n/routing'
 
 import type { Header } from '@/payload-types'
 
@@ -24,6 +24,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
+  const t = useTranslations('Header')
 
   useEffect(() => {
     setHeaderTheme(null)
@@ -63,7 +64,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
             <div className="flex items-center gap-4">
               <ThemeSelector />
               <Link href="/search">
-                <span className="sr-only">Search</span>
+                <span className="sr-only">{t('search')}</span>
                 <SearchIcon className="w-5 text-primary" />
               </Link>
             </div>

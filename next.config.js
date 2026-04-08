@@ -1,4 +1,7 @@
 import { withPayload } from '@payloadcms/next/withPayload'
+import createNextIntlPlugin from 'next-intl/plugin'
+
+const withNextIntl = createNextIntlPlugin()
 
 import redirects from './redirects.js'
 
@@ -37,4 +40,4 @@ const nextConfig = {
   output: 'standalone',
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+export default withNextIntl(withPayload(nextConfig), { devBundleServerPackages: false })

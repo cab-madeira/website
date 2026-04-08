@@ -1,24 +1,11 @@
+"use client"
+
 import React from 'react'
-
-const defaultLabels = {
-  plural: 'Docs',
-  singular: 'Doc',
-}
-
-const defaultCollectionLabels = {
-  posts: {
-    plural: 'Posts',
-    singular: 'Post',
-  },
-  gallery: {
-    plural: 'Galleries',
-    singular: 'Gallery',
-  },
-}
+import { useTranslations } from 'next-intl'
 
 export const PageRange: React.FC<{
   className?: string
-  collection?: keyof typeof defaultCollectionLabels
+  collection?: 'posts' | 'gallery'
   collectionLabels?: {
     plural?: string
     singular?: string
@@ -35,6 +22,8 @@ export const PageRange: React.FC<{
     limit,
     totalDocs,
   } = props
+  const tPagination = useTranslations('Pagination')
+  const tPageRange = useTranslations('PageRange')
 
   let indexStart = (currentPage ? currentPage - 1 : 1) * (limit || 1) + 1
   if (totalDocs && indexStart > totalDocs) indexStart = 0
@@ -42,18 +31,21 @@ export const PageRange: React.FC<{
   let indexEnd = (currentPage || 1) * (limit || 1)
   if (totalDocs && indexEnd > totalDocs) indexEnd = totalDocs
 
-  const { plural, singular } =
-    collectionLabelsFromProps ||
-    (collection ? defaultCollectionLabels[collection] : undefined) ||
-    defaultLabels ||
-    {}
+  const defaultLabels =
+    collection === 'posts'
+      ? { plural: tPageRange('postsPlural'), singular: tPageRange('postSingular') }
+      : collection === 'gallery'
+        ? { plural: tPageRange('galleriesPlural'), singular: tPageRange('gallerySingular') }
+        : { plural: tPageRange('docsPlural'), singular: tPageRange('docSingular') }
+
+  const { plural, singular } = collectionLabelsFromProps || defaultLabels
 
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>
-      {(typeof totalDocs === 'undefined' || totalDocs === 0) && 'Search produced no results.'}
+      {(typeof totalDocs === 'undefined' || totalDocs === 0) && tPagination('noResults')}
       {typeof totalDocs !== 'undefined' &&
         totalDocs > 0 &&
-        `Showing ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} of ${totalDocs} ${totalDocs > 1 ? plural : singular
+        `${tPagination('showing')} ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} ${tPagination('of')} ${totalDocs} ${totalDocs > 1 ? plural : singular
         }`}
     </div>
   )

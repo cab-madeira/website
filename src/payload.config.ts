@@ -18,6 +18,7 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import localization from './i18n/localization'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -70,6 +71,11 @@ export default buildConfig({
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, GlobalAPI],
   plugins: [...plugins],
+  localization: {
+    defaultLocale: localization.defaultLocale,
+    fallback: localization.fallback,
+    locales: localization.locales.map(({ code }) => code),
+  },
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

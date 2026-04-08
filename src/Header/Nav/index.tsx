@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from "react"
+import { useTranslations } from 'next-intl'
 
 import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { Link, usePathname } from '@/i18n/routing'
 import { MenuIcon, ChevronDown, X } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { LanguageSelector } from '@/components/LanguageSelector'
@@ -54,6 +54,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const [open, setOpen] = useState(false)
   const [entered, setEntered] = useState(false)
   const pathname = usePathname()
+  const t = useTranslations('HeaderNav')
 
   useEffect(() => {
     if (open) setOpen(false)
@@ -79,6 +80,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
       <Button
         onClick={() => setOpen(true)}
         variant="link"
+        aria-label={t('openMenu')}
       >
         <MenuIcon />
       </Button>
@@ -98,9 +100,9 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
               } rounded-tr-2xl rounded-br-2xl border-r`}
           >
             <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-xl font-bold">Navigation</h3>
+              <h3 className="text-xl font-bold">{t('navigation')}</h3>
               <button
-                aria-label="Close menu"
+                aria-label={t('closeMenu')}
                 onClick={() => setOpen(false)}
                 className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 outline outline-0 hover:outline-2 outline-black dark:outline-white rounded-md transition-colors"
               >

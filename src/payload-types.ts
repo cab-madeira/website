@@ -110,7 +110,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'pt') | ('en' | 'pt')[];
   globals: {
     header: Header;
     footer: Footer;
@@ -121,7 +121,7 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
     globalAPI: GlobalAPISelect<false> | GlobalAPISelect<true>;
   };
-  locale: null;
+  locale: 'en' | 'pt';
   widgets: {
     collections: CollectionsWidget;
   };
@@ -167,19 +167,9 @@ export interface Page {
     | (
         | CallToActionBlock
         | ContentBlock
-        | {
-            media: number | Media;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'mediaBlock';
-          }
+        | MediaBlock
         | ArchiveBlock
-        | {
-            form: number | Form;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'formBlock';
-          }
+        | FormBlock
         | DiviserBlock
         | ShopFeaturedBlock
         | GalleryBlock
@@ -533,6 +523,16 @@ export interface ContentBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock".
+ */
+export interface MediaBlock {
+  media: number | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
@@ -540,6 +540,16 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock".
+ */
+export interface FormBlock {
+  form: number | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'formBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -774,16 +784,6 @@ export interface CalendarBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'calendarBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: number | Form;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1930,16 +1930,6 @@ export interface TaskSchedulePublish {
     user?: (number | null) | User;
   };
   output?: unknown;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
- */
-export interface MediaBlock {
-  media: number | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

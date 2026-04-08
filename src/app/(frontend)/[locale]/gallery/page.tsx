@@ -5,12 +5,23 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { PageRange } from '@/components/PageRange'
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { getTranslations } from 'next-intl/server'
+import { normalizeLocale } from '@/i18n/routing'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page() {
+type Args = {
+    params: Promise<{
+        locale?: string
+    }>
+}
+
+export default async function Page({ params: paramsPromise }: Args) {
     const payload = await getPayload({ config: configPromise })
+    const { locale: localeParam } = await paramsPromise
+    const locale = normalizeLocale(localeParam)
+    const t = await getTranslations({ locale, namespace: 'GalleryPage' })
 
     const galleries = await payload.find({
         collection: 'gallery',
@@ -62,7 +73,7 @@ export default async function Page() {
 
             <div className="container mb-16">
                 <div className="prose dark:prose-invert max-w-none">
-                    <h1>Galleries</h1>
+                    <h1>{t('title')}</h1>
                 </div>
             </div>
 
@@ -87,8 +98,12 @@ export default async function Page() {
     )
 }
 
-export function generateMetadata(): Metadata {
+export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
+    const { locale: localeParam } = await paramsPromise
+    const locale = normalizeLocale(localeParam)
+    const t = await getTranslations({ locale, namespace: 'GalleryPage' })
+
     return {
-        title: `Payload Website Template Galleries`,
+        title: t('title'),
     }
 }
